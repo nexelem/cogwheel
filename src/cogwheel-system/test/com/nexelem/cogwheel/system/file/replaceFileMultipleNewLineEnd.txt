@@ -1,0 +1,3 @@
+Hello {name} !
+My name is {myName}.
+From {country} with love.

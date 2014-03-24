@@ -1,0 +1,48 @@
+apply plugin: "scala"
+apply plugin: "maven-publish"
+
+dependencies {
+    compile('org.scala-lang:scala-compiler:2.10.2')
+    compile('commons-logging:commons-logging:1.1.3')
+
+    testCompile('org.specs2:specs2_2.10:2.3.8') {
+        exclude group: 'com.chuusai'
+        exclude group: 'org.mockito'
+        exclude group: 'org.pegdown'
+        exclude group: 'org.scala-lang'
+        exclude group: 'org.scala-sbt'
+        exclude group: 'org.scalacheck'
+        exclude group: 'org.scalamacros'
+        exclude group: 'org.specs2', module: 'classycle'
+        exclude group: 'org.scalaz', module: 'scalaz-effect_2.10'
+    }
+    testCompile('commons-io:commons-io:2.4')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+
+        println configurations.runtime.allDependencies
+    }
+    repositories {
+        maven {
+            credentials {
+                username "admin"
+                password "admin123"
+            }
+            url  "http://pds.nexelem.com:8081/nexus/content/repositories/snapshots"
+        }
+    }
+}
+
+// workaround for task processTestResources in Scala test projects -> for some reason it does not copy the resources as it should
+// so here it is done manualy
+task copyTestResources(type: Copy) {
+    from compileTestScala.source
+    into compileTestScala.destinationDir
+    exclude '**/*.scala', '**/*.java'
+}
+test.dependsOn copyTestResources

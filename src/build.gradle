@@ -1,0 +1,53 @@
+import java.text.SimpleDateFormat
+project.ext.timestamp = "SNAPSHOT-${new SimpleDateFormat('yyyyMMdd_HHmm').format(new Date())}";
+
+subprojects {
+    apply plugin: "scala"
+
+    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+    group = "com.nexelem.coghweel"
+    version = "1.0-SNAPSHOT"
+        
+    repositories {
+        maven {
+          url "http://pds.nexelem.com:8081/nexus/content/groups/public"
+        }
+        flatDir(name: "local", dirs: "../lib")
+    }
+	  
+    sourceSets {
+        main {
+            java {
+			    srcDir("src")
+	        }
+            scala {
+                srcDir("src")
+            }
+	        resources {
+			    srcDir("src")
+	        }
+        }
+        test {
+            java {
+                srcDir("test")
+            }
+            scala {
+                srcDir("test")
+            }
+            resources {
+                srcDir("test")
+            }
+        }
+    }
+    
+    processTestResources.exclude "**/*.java, **/*.scala"
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+
+    jar.from "src"
+    jar.excludes = ["**/*.java", "**/*.scala"]           
+}
+
+evaluationDependsOnChildren()
