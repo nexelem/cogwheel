@@ -1,12 +1,11 @@
 import java.text.SimpleDateFormat
-project.ext.timestamp = "SNAPSHOT-${new SimpleDateFormat('yyyyMMdd_HHmm').format(new Date())}";
 
 subprojects {
     apply plugin: "scala"
 
     [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-    group = "com.nexelem.coghweel"
+    group = "com.nexelem.cogwheel"
     version = "1.0-SNAPSHOT"
         
     repositories {
