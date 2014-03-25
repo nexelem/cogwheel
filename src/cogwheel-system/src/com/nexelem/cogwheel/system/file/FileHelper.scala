@@ -3,6 +3,7 @@ package com.nexelem.cogwheel.system.file
 import java.io.{FileWriter, BufferedWriter, File}
 import scala.io.Source
 import scala.util.Properties
+import com.nexelem.cogwheel.system.process.ProcessHelper._
 
 /**
  * Project: cogwheel
@@ -53,6 +54,29 @@ object FileHelper {
 
     new File(filePath).delete()
     new File(newFilename).renameTo(new File(filePath))
+  }
+
+  /**
+   * FIXME 1. this method should be rewritten to use Java/Scala notions instead of system specific (bash, unzip etc.) 2. There should be appropriate unit test(s).
+   *
+   * Unpacks file, performs given operation on its content and repacks it back.
+   * @param filePath source file is being get from there.
+   * @param targetPath repacked file is sent there.
+   * @param operation closure representing operation executed on unpacked zip contents.
+   */
+  def repackAndProcess(filePath: String, targetPath: String)(operation: String => Unit) {
+    val tempDir = File.createTempFile("temp", null).getAbsolutePath()
+    val fileName = new File(filePath).getName()
+
+    bash(s"rm -rf $tempDir")
+    bash(s"mkdir $tempDir")
+
+    bash(s"unzip -q -o $filePath -d $tempDir")
+    operation(tempDir)
+    bash(s"cd $tempDir; zip -r $fileName ./*")
+    bash(s"cp $tempDir/$fileName $targetPath")
+
+    bash(s"rm -rf $tempDir")
   }
 
   private def writeLine(line: String, buffWriter: BufferedWriter, markerReplacements: (String, String)*) {
