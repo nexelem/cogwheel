@@ -13,13 +13,23 @@ import scala.util.Properties
  * Utility object containing methods for operating on files and directories.
  */
 object FileHelper {
+
   /**
    * Replaces values in given file.
-   * @param filePath path to the file.
+   * @param filePath
    * @param markerReplacements replacement values
    */
   def replaceValuesInFile(filePath: String, markerReplacements: (String, String)*) {
+    replaceValuesInFile(filePath, markerReplacements, Properties.lineSeparator)
+  }
 
+  /**
+   * Replaces values in given file.
+   * @param filePath
+   * @param markerReplacements replacement values
+   * @param separator line separator (defaults to system specific)
+   */
+  def replaceValuesInFile(filePath: String, markerReplacements: Seq[(String, String)], separator: String = Properties.lineSeparator) {
     var buffWriter: BufferedWriter = null
     var fileWriter: FileWriter = null
 
@@ -33,8 +43,7 @@ object FileHelper {
       val linesExceptLast = lines.slice(0, lines.size - 1)
 
       linesExceptLast.foreach(line => {
-        writeLine(line, buffWriter, markerReplacements:_*)
-        buffWriter.newLine()
+        writeLine(line + separator, buffWriter, markerReplacements:_*)
       })
       writeLine(lines.last, buffWriter, markerReplacements:_*)
 
