@@ -4,6 +4,7 @@ import java.io.{FileWriter, BufferedWriter, File}
 import scala.io.Source
 import scala.util.Properties
 import com.nexelem.cogwheel.system.process.ProcessHelper._
+import scala.collection.mutable
 
 /**
  * Project: cogwheel
@@ -77,6 +78,31 @@ object FileHelper {
     bash(s"cp $tempDir/$fileName $targetPath")
 
     bash(s"rm -rf $tempDir")
+  }
+
+  /**
+   * Scans given file contents and tries to match regex expression.
+   * @return seq of seqs where each element contains 0: matched line (as a whole) and next number of matched regex groups (if defined in regex)
+   */
+  def matchLinesInFile(filePath: String, regex: String): Seq[Seq[String]] = {
+    val matchedLines = mutable.MutableList[Seq[String]]()
+    val pattern = regex.r
+    Source.fromFile(filePath).getLines().foreach { line =>
+      val matched = pattern.findFirstMatchIn(line)
+      if(matched.isDefined) {
+        val count = matched.get.groupCount
+        val matchedLine = mutable.MutableList[String]()
+
+        matchedLine += line
+        for(groupIndex <- 1 to count) {
+          matchedLine += matched.get.group(groupIndex)
+        }
+
+        matchedLines += matchedLine
+      }
+    }
+
+    matchedLines
   }
 
   private def writeLine(line: String, buffWriter: BufferedWriter, markerReplacements: (String, String)*) {
