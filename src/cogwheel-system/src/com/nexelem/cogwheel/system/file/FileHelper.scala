@@ -4,6 +4,8 @@ import java.io.{FileWriter, BufferedWriter, File}
 import scala.io.Source
 import scala.util.Properties
 import com.nexelem.cogwheel.system.process.ProcessHelper._
+import com.nexelem.cogwheel.system.zip.ZipHelper
+import org.apache.commons.io.FileUtils
 
 /**
  * Project: cogwheel
@@ -65,18 +67,15 @@ object FileHelper {
    * @param operation closure representing operation executed on unpacked zip contents.
    */
   def repackAndProcess(filePath: String, targetPath: String)(operation: String => Unit) {
-    val tempDir = File.createTempFile("temp", null).getAbsolutePath()
+    val tempDir  = File.createTempFile("temp", null).getAbsolutePath()
     val fileName = new File(filePath).getName()
-
-    bash(s"rm -rf $tempDir")
-    bash(s"mkdir $tempDir")
-
-    bash(s"unzip -q -o $filePath -d $tempDir")
+    FileUtils.forceDelete(new File(tempDir))
+    FileUtils.forceMkdir(new File(tempDir))
+    ZipHelper.extractZip(filePath, tempDir)
     operation(tempDir)
-    bash(s"cd $tempDir; zip -r $fileName ./*")
-    bash(s"cp $tempDir/$fileName $targetPath")
-
-    bash(s"rm -rf $tempDir")
+    ZipHelper.createZip(tempDir, tempDir + File.separator + fileName)
+    FileUtils.copyFile(new File(tempDir, fileName), new File(targetPath))
+    FileUtils.deleteDirectory(new File(tempDir))
   }
 
   private def writeLine(line: String, buffWriter: BufferedWriter, markerReplacements: (String, String)*) {
