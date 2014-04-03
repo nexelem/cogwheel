@@ -5,6 +5,7 @@ import scala.io.Source
 import scala.util.Properties
 import com.nexelem.cogwheel.system.process.ProcessHelper._
 import scala.collection.mutable
+import com.nexelem.cogwheel.system.io.IOHelper
 
 /**
  * Project: cogwheel
@@ -87,19 +88,24 @@ object FileHelper {
   def matchLinesInFile(filePath: String, regex: String): Seq[Seq[String]] = {
     val matchedLines = mutable.MutableList[Seq[String]]()
     val pattern = regex.r
-    Source.fromFile(filePath).getLines().foreach { line =>
-      val matched = pattern.findFirstMatchIn(line)
-      if(matched.isDefined) {
-        val count = matched.get.groupCount
-        val matchedLine = mutable.MutableList[String]()
+    val source = Source.fromFile(filePath)
+    try {
+      source.getLines().foreach { line =>
+        val matched = pattern.findFirstMatchIn(line)
+        if(matched.isDefined) {
+          val count = matched.get.groupCount
+          val matchedLine = mutable.MutableList[String]()
 
-        matchedLine += line
-        for(groupIndex <- 1 to count) {
-          matchedLine += matched.get.group(groupIndex)
+          matchedLine += line
+          for(groupIndex <- 1 to count) {
+            matchedLine += matched.get.group(groupIndex)
+          }
+
+          matchedLines += matchedLine
         }
-
-        matchedLines += matchedLine
       }
+    } finally {
+      IOHelper.closeQuietely(source)
     }
 
     matchedLines

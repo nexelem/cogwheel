@@ -15,8 +15,6 @@ import java.io.File
  */
 class FileHelperTest extends SpecificationWithJUnit {
 
-  private val log = LogFactory.getLog(getClass)
-
   "replacing value in files" should {
     "replace existing values correctly" in {
       val srcFile = new File(getClass.getResource("replaceFileSimple.txt").getPath)
