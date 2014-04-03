@@ -6,15 +6,19 @@ import org.apache.commons.compress.utils.IOUtils
 import org.apache.commons.io.FileUtils
 
 /**
- * Created by mzagorski on 28.03.14.
+ * Project: cogwheel
+ * User: mzagorski
+ * Date: 3/4/14
+ * Time: 2:15 PM
+ * Version: 1.0
  */
 object ZipHelper {
-  private final val ARCHIVE_FILE_SEPARATOR: String = "/"
+  private val ARCHIVE_FILE_SEPARATOR: String = "/"
 
 
   def createZip(directoryPath: String, zipPath: String) {
-    val dir: File = new File(directoryPath)
-    val zipFile: File = new File(zipPath)
+    val dir = new File(directoryPath)
+    val zipFile = new File(zipPath)
     if (!dir.isDirectory) {
       throw new IllegalArgumentException(directoryPath + " is not a valid directory")
     }
@@ -22,7 +26,7 @@ object ZipHelper {
     try {
       tOut = new ZipArchiveOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile)))
       for (f <- dir.listFiles) {
-        if (!(zipFile == f)) {
+        if (zipFile != f) {
           addFileToZip(tOut, f, "")
         }
       }
@@ -34,22 +38,17 @@ object ZipHelper {
 
 
   def extractZip(archivePath: String, destinationPath: String) {
-    val archiveFile: File = new File(archivePath)
+    val archiveFile = new File(archivePath)
     if(!archiveFile.exists || !archiveFile.isFile) {
       throw new IllegalArgumentException(archiveFile.getAbsolutePath + " is not a valid file")
     }
     var zipFile: ZipFile = null
     try {
       zipFile = new ZipFile(archiveFile)
-      val entries: java.util.Enumeration[ZipArchiveEntry] = zipFile.getEntries
+      val entries = zipFile.getEntries
       while (entries.hasMoreElements) {
         val entry: ZipArchiveEntry = entries.nextElement
         extractEntry(zipFile, entry, destinationPath)
-      }
-    }
-    catch {
-      case e: Exception => {
-        e.printStackTrace
       }
     } finally {
       IOUtils.closeQuietly(zipFile)
@@ -58,14 +57,14 @@ object ZipHelper {
 
 
   private def addFileToZip(zOut: ZipArchiveOutputStream, f: File, base: String) {
-    val entryName: String = base + f.getName
-    val zipEntry: ZipArchiveEntry = new ZipArchiveEntry(f, entryName)
+    val entryName = base + f.getName
+    val zipEntry = new ZipArchiveEntry(f, entryName)
     zOut.putArchiveEntry(zipEntry)
     if (f.isFile) {
       writeFileContent(zOut, f)
     }
     zOut.closeArchiveEntry
-    val children: Array[File] = f.listFiles
+    val children = f.listFiles
     if (children != null) {
       for (child <- children) {
         addFileToZip(zOut, child, entryName + ARCHIVE_FILE_SEPARATOR)
@@ -87,7 +86,7 @@ object ZipHelper {
 
 
   private def extractEntry(zipFile: ZipFile, entry: ZipArchiveEntry, destPath: String) {
-    val f: File = new File(destPath, entry.getName.replace(ARCHIVE_FILE_SEPARATOR, File.separator))
+    val f = new File(destPath, entry.getName.replace(ARCHIVE_FILE_SEPARATOR, File.separator))
     if (entry.isDirectory) {
       FileUtils.forceMkdir(f)
       return
@@ -96,7 +95,7 @@ object ZipHelper {
       FileUtils.forceDelete(f)
     }
     var fos: FileOutputStream = null
-    val content: InputStream = zipFile.getInputStream(entry)
+    val content = zipFile.getInputStream(entry)
     try {
       fos = new FileOutputStream(f)
       IOUtils.copy(content, fos)

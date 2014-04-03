@@ -5,7 +5,11 @@ import java.io.{FileInputStream, File}
 import org.apache.commons.io.FileUtils
 
 /**
- * Created by mzagorski on 28.03.14.
+ * Project: cogwheel
+ * User: mzagorski
+ * Date: 3/4/14
+ * Time: 2:15 PM
+ * Version: 1.0
  */
 class ZipHelperTest extends SpecificationWithJUnit {
 
@@ -57,7 +61,7 @@ class ZipHelperTest extends SpecificationWithJUnit {
 
     "pack and extrect archives correctly" in {
       val contentDirName = "test_zip_content"
-      val testDir : java.io.File = new File(getClass.getResource(contentDirName).getPath).getParentFile
+      val testDir = new File(getClass.getResource(contentDirName).getPath).getParentFile
       val zipFilePath =  testDir.getAbsolutePath + File.separator + "result.zip"
       val contentDirPath = testDir.getAbsolutePath + File.separator + contentDirName
       val resultDirPath = testDir.getAbsolutePath + File.separator + "test_zip_result_dir"
@@ -76,7 +80,7 @@ class ZipHelperTest extends SpecificationWithJUnit {
 
     "pack and extract archives correctly if zip file is created inside zipped dir" in {
       val contentDirName = "test_zip_content"
-      val testDir : java.io.File = new File(getClass.getResource(contentDirName).getPath).getParentFile
+      val testDir = new File(getClass.getResource(contentDirName).getPath).getParentFile
       val contentDirPath = testDir.getAbsolutePath + File.separator + contentDirName
       val zipFilePath = contentDirPath + File.separator + "result.zip"
       val resultDirPath = testDir.getAbsolutePath + File.separator + "test_zip_result_dir"

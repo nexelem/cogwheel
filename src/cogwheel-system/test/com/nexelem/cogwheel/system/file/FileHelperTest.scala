@@ -72,24 +72,7 @@ class FileHelperTest extends SpecificationWithJUnit {
       val testZip = new File(getClass.getResource("repack_test.zip").getPath)
       val resultZip = new File(testZip.getParent, "result.zip")
       val testFilesContent = scala.collection.mutable.Map[String, String]()
-      val operation = (tmpPath : String) => {
-        val tmpDir = new File(tmpPath)
-        tmpDir.isDirectory must beEqualTo(true)
-        val files = tmpDir.listFiles
-        for (i <- 0 to files.length-1) {
-          val source = Source.fromFile(files(i))
-          val out = new PrintWriter(files(i).getAbsolutePath, "UTF-8")
-          try{
-            val readText = source.mkString + " test " + i
-            testFilesContent(files(i).getName) = readText
-            out.print(readText)
-          }
-          finally{
-            source.close
-            out.close
-          }
-        }
-      }
+      val operation = createTextFilesModifyingOperation(testFilesContent)
       val extractedDir = new File(resultZip.getParent + File.separator + "result")
       try {
         FileHelper.repackAndProcess(testZip.getAbsolutePath, resultZip.getAbsolutePath)(operation)
@@ -98,21 +81,45 @@ class FileHelperTest extends SpecificationWithJUnit {
         extractedDir.isDirectory must beEqualTo(true)
         ZipHelper.extractZip(resultZip.getAbsolutePath, extractedDir.getAbsolutePath)
         val resultFiles = extractedDir.listFiles()
-        for (i <- 0 to resultFiles.length-1) {
-          val source = Source.fromFile(resultFiles(i))
+        resultFiles.foreach { resultFile => {
+          val source = Source.fromFile(resultFile)
           try{
-            source.mkString must beEqualTo(testFilesContent(resultFiles(i).getName))
+            source.mkString must beEqualTo(testFilesContent(resultFile.getName))
           }
           finally{
-            source.close
+            source.close()
           }
+        }
         }
         success
       } finally {
-        FileUtils.deleteQuietly(resultZip)
         FileUtils.deleteQuietly(resultZip)
         FileUtils.deleteQuietly(extractedDir)
       }
     }
   }
+
+  
+  private def createTextFilesModifyingOperation(fileMap : scala.collection.mutable.Map[String, String]): String => Unit =  {
+    val operation = (tmpPath : String) => {
+      val tmpDir = new File(tmpPath)
+      tmpDir.isDirectory must beEqualTo(true)
+      val files = tmpDir.listFiles
+      for (i <- 0 to files.length-1) {
+        val source = Source.fromFile(files(i))
+        val out = new PrintWriter(files(i).getAbsolutePath, "UTF-8")
+        try{
+          val readText = source.mkString + " test " + i
+          fileMap(files(i).getName) = readText
+          out.print(readText)
+        }
+        finally{
+          source.close()
+          out.close()
+        }
+      }
+    }
+    operation
+  }
+
 }
