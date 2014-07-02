@@ -89,20 +89,20 @@ object ZipHelper {
     val f = new File(destPath, entry.getName.replace(ARCHIVE_FILE_SEPARATOR, File.separator))
     if (entry.isDirectory) {
       FileUtils.forceMkdir(f)
-      return
-    }
-    if (f.exists && !entry.isDirectory) {
-      FileUtils.forceDelete(f)
-    }
-    var fos: FileOutputStream = null
-    val content = zipFile.getInputStream(entry)
-    try {
-      fos = new FileOutputStream(f)
-      IOUtils.copy(content, fos)
-    }
-    finally {
-      IOUtils.closeQuietly(content)
-      IOUtils.closeQuietly(fos)
+    } else {
+      if (f.exists && !entry.isDirectory) {
+        FileUtils.forceDelete(f)
+      }
+      var fos: FileOutputStream = null
+      val content = zipFile.getInputStream(entry)
+      try {
+        fos = new FileOutputStream(f)
+        IOUtils.copy(content, fos)
+      }
+      finally {
+        IOUtils.closeQuietly(content)
+        IOUtils.closeQuietly(fos)
+      }
     }
   }
 
