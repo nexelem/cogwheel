@@ -4,7 +4,8 @@ import java.io.{FileWriter, BufferedWriter, File}
 import scala.io.Source
 import scala.util.Properties
 import com.nexelem.cogwheel.system.process.ProcessHelper._
-import scala.collection.mutable
+import com.nexelem.cogwheel.system.zip.ZipHelper
+import org.apache.commons.io.FileUtils
 import com.nexelem.cogwheel.system.io.IOHelper
 
 /**
@@ -59,8 +60,6 @@ object FileHelper {
   }
 
   /**
-   * FIXME 1. this method should be rewritten to use Java/Scala notions instead of system specific (bash, unzip etc.) 2. There should be appropriate unit test(s).
-   *
    * Unpacks file, performs given operation on its content and repacks it back.
    * @param filePath source file is being get from there.
    * @param targetPath repacked file is sent there.
@@ -70,15 +69,15 @@ object FileHelper {
     val tempDir = File.createTempFile("temp", null).getAbsolutePath()
     val fileName = new File(filePath).getName()
 
-    bash(s"rm -rf $tempDir")
-    bash(s"mkdir $tempDir")
+    FileUtils.forceDelete(new File(tempDir))
+    FileUtils.forceMkdir(new File(tempDir))
+    ZipHelper.extractZip(filePath, tempDir)
 
-    bash(s"unzip -q -o $filePath -d $tempDir")
     operation(tempDir)
-    bash(s"cd $tempDir; zip -r $fileName ./*")
-    bash(s"cp $tempDir/$fileName $targetPath")
 
-    bash(s"rm -rf $tempDir")
+    ZipHelper.createZip(tempDir, tempDir + File.separator + fileName)
+    FileUtils.copyFile(new File(tempDir, fileName), new File(targetPath))
+    FileUtils.deleteDirectory(new File(tempDir))
   }
 
   /**
