@@ -6,6 +6,7 @@ import scala.io.Source
 import org.apache.commons.io.FileUtils
 import java.io.{PrintWriter, File}
 import com.nexelem.cogwheel.system.zip.ZipHelper
+import java.io.File
 
 /**
  * Project: cogwheel
@@ -17,7 +18,6 @@ import com.nexelem.cogwheel.system.zip.ZipHelper
 class FileHelperTest extends SpecificationWithJUnit {
 
   private val log = LogFactory.getLog(getClass)
-
   sequential // sekwencyjne wykonanie testow
 
   "replacing value in files" should {
@@ -83,10 +83,10 @@ class FileHelperTest extends SpecificationWithJUnit {
         val resultFiles = extractedDir.listFiles()
         resultFiles.foreach { resultFile => {
           val source = Source.fromFile(resultFile)
-          try{
+          try {
             source.mkString must beEqualTo(testFilesContent(resultFile.getName))
           }
-          finally{
+          finally {
             source.close()
           }
         }
@@ -99,21 +99,64 @@ class FileHelperTest extends SpecificationWithJUnit {
     }
   }
 
-  
-  private def createTextFilesModifyingOperation(fileMap : scala.collection.mutable.Map[String, String]): String => Unit =  {
-    val operation = (tmpPath : String) => {
+  "searching for regex in files" should {
+    "return proper entry if there exist simple entry that matches regex" in {
+      val srcPath = getClass.getResource("regex_sample.txt").getPath
+      val matchedSeq = FileHelper.matchLinesInFile(srcPath, ".*stars and the.*")
+
+      matchedSeq must haveSize(1)
+      matchedSeq(0) must haveSize(1)
+      matchedSeq(0)(0) must beEqualTo("But the stars and the stillness")
+    }
+
+    "return proper entries if there are 3 lines matched and groups in each" in {
+      val srcPath = getClass.getResource("regex_sample.txt").getPath
+      val matchedSeq = FileHelper.matchLinesInFile(srcPath, "^(\\w+) (\\w+) (\\w+) (\\w+)$")
+
+      matchedSeq must haveSize(3)
+      matchedSeq(0) must haveSize(5)
+
+      matchedSeq(0)(0) must beEqualTo("The lightning and thunder")
+      matchedSeq(0)(1) must beEqualTo("The")
+      matchedSeq(0)(2) must beEqualTo("lightning")
+      matchedSeq(0)(3) must beEqualTo("and")
+      matchedSeq(0)(4) must beEqualTo("thunder")
+
+      matchedSeq(1)(0) must beEqualTo("They go and come")
+      matchedSeq(1)(1) must beEqualTo("They")
+      matchedSeq(1)(2) must beEqualTo("go")
+      matchedSeq(1)(3) must beEqualTo("and")
+      matchedSeq(1)(4) must beEqualTo("come")
+
+      matchedSeq(2)(0) must beEqualTo("Are always at home")
+      matchedSeq(2)(1) must beEqualTo("Are")
+      matchedSeq(2)(2) must beEqualTo("always")
+      matchedSeq(2)(3) must beEqualTo("at")
+      matchedSeq(2)(4) must beEqualTo("home")
+    }
+
+    "return nothing if there is not match at all" in {
+      val srcPath = getClass.getResource("regex_sample.txt").getPath
+      val matchedSeq = FileHelper.matchLinesInFile(srcPath, "^this regex is not found$")
+
+      matchedSeq must beEmpty
+    }
+  }
+
+  private def createTextFilesModifyingOperation(fileMap : scala.collection.mutable.Map[String, String]): String => Unit = {
+    val operation = (tmpPath: String) => {
       val tmpDir = new File(tmpPath)
       tmpDir.isDirectory must beEqualTo(true)
       val files = tmpDir.listFiles
-      for (i <- 0 to files.length-1) {
+      for (i <- 0 to files.length - 1) {
         val source = Source.fromFile(files(i))
         val out = new PrintWriter(files(i).getAbsolutePath, "UTF-8")
-        try{
+        try {
           val readText = source.mkString + " test " + i
           fileMap(files(i).getName) = readText
           out.print(readText)
         }
-        finally{
+        finally {
           source.close()
           out.close()
         }
@@ -121,5 +164,4 @@ class FileHelperTest extends SpecificationWithJUnit {
     }
     operation
   }
-
 }

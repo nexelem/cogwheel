@@ -6,6 +6,9 @@ import scala.util.Properties
 import com.nexelem.cogwheel.system.process.ProcessHelper._
 import com.nexelem.cogwheel.system.zip.ZipHelper
 import org.apache.commons.io.FileUtils
+import com.nexelem.cogwheel.system.io.IOHelper
+import scala.collection.mutable.MutableList
+
 
 /**
  * Project: cogwheel
@@ -59,23 +62,54 @@ object FileHelper {
   }
 
   /**
-   * FIXME 1. this method should be rewritten to use Java/Scala notions instead of system specific (bash, unzip etc.) 2. There should be appropriate unit test(s).
-   *
    * Unpacks file, performs given operation on its content and repacks it back.
    * @param filePath source file is being get from there.
    * @param targetPath repacked file is sent there.
    * @param operation closure representing operation executed on unpacked zip contents.
    */
   def repackAndProcess(filePath: String, targetPath: String)(operation: String => Unit) {
-    val tempDir  = File.createTempFile("temp", null).getAbsolutePath()
+    val tempDir = File.createTempFile("temp", null).getAbsolutePath()
     val fileName = new File(filePath).getName()
+
     FileUtils.forceDelete(new File(tempDir))
     FileUtils.forceMkdir(new File(tempDir))
     ZipHelper.extractZip(filePath, tempDir)
+
     operation(tempDir)
+
     ZipHelper.createZip(tempDir, tempDir + File.separator + fileName)
     FileUtils.copyFile(new File(tempDir, fileName), new File(targetPath))
     FileUtils.deleteDirectory(new File(tempDir))
+  }
+
+  /**
+   * Scans given file contents and tries to match regex expression.
+   * @return seq of seqs where each element contains 0: matched line (as a whole) and next number of matched regex groups (if defined in regex)
+   */
+  def matchLinesInFile(filePath: String, regex: String): Seq[Seq[String]] = {
+    val matchedLines = MutableList[Seq[String]]()
+    val pattern = regex.r
+    val source = Source.fromFile(filePath)
+    try {
+      source.getLines().foreach { line =>
+        val matched = pattern.findFirstMatchIn(line)
+        if(matched.isDefined) {
+          val count = matched.get.groupCount
+          val matchedLine = MutableList[String]()
+
+          matchedLine += line
+          for(groupIndex <- 1 to count) {
+            matchedLine += matched.get.group(groupIndex)
+          }
+
+          matchedLines += matchedLine
+        }
+      }
+    } finally {
+      IOHelper.closeQuietely(source)
+    }
+
+    matchedLines
   }
 
   private def writeLine(line: String, buffWriter: BufferedWriter, markerReplacements: (String, String)*) {
