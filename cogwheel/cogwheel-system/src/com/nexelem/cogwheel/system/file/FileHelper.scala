@@ -7,6 +7,8 @@ import com.nexelem.cogwheel.system.process.ProcessHelper._
 import com.nexelem.cogwheel.system.zip.ZipHelper
 import org.apache.commons.io.FileUtils
 import com.nexelem.cogwheel.system.io.IOHelper
+import scala.collection.mutable.MutableList
+
 
 /**
  * Project: cogwheel
@@ -85,7 +87,7 @@ object FileHelper {
    * @return seq of seqs where each element contains 0: matched line (as a whole) and next number of matched regex groups (if defined in regex)
    */
   def matchLinesInFile(filePath: String, regex: String): Seq[Seq[String]] = {
-    val matchedLines = mutable.MutableList[Seq[String]]()
+    val matchedLines = MutableList[Seq[String]]()
     val pattern = regex.r
     val source = Source.fromFile(filePath)
     try {
@@ -93,7 +95,7 @@ object FileHelper {
         val matched = pattern.findFirstMatchIn(line)
         if(matched.isDefined) {
           val count = matched.get.groupCount
-          val matchedLine = mutable.MutableList[String]()
+          val matchedLine = MutableList[String]()
 
           matchedLine += line
           for(groupIndex <- 1 to count) {
