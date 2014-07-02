@@ -4,6 +4,8 @@ import org.specs2.mutable.SpecificationWithJUnit
 import org.apache.commons.logging.LogFactory
 import scala.io.Source
 import org.apache.commons.io.FileUtils
+import java.io.{PrintWriter, File}
+import com.nexelem.cogwheel.system.zip.ZipHelper
 import java.io.File
 
 /**
@@ -14,6 +16,9 @@ import java.io.File
  * Version: 1.0
  */
 class FileHelperTest extends SpecificationWithJUnit {
+
+  private val log = LogFactory.getLog(getClass)
+  sequential // sekwencyjne wykonanie testow
 
   "replacing value in files" should {
     "replace existing values correctly" in {
@@ -62,6 +67,38 @@ class FileHelperTest extends SpecificationWithJUnit {
     }
   }
 
+  "repacking and processing" should {
+    "repack existing archive correctly" in {
+      val testZip = new File(getClass.getResource("repack_test.zip").getPath)
+      val resultZip = new File(testZip.getParent, "result.zip")
+      val testFilesContent = scala.collection.mutable.Map[String, String]()
+      val operation = createTextFilesModifyingOperation(testFilesContent)
+      val extractedDir = new File(resultZip.getParent + File.separator + "result")
+      try {
+        FileHelper.repackAndProcess(testZip.getAbsolutePath, resultZip.getAbsolutePath)(operation)
+        resultZip.isFile must beEqualTo(true)
+        FileUtils.forceMkdir(extractedDir)
+        extractedDir.isDirectory must beEqualTo(true)
+        ZipHelper.extractZip(resultZip.getAbsolutePath, extractedDir.getAbsolutePath)
+        val resultFiles = extractedDir.listFiles()
+        resultFiles.foreach { resultFile => {
+          val source = Source.fromFile(resultFile)
+          try {
+            source.mkString must beEqualTo(testFilesContent(resultFile.getName))
+          }
+          finally {
+            source.close()
+          }
+        }
+        }
+        success
+      } finally {
+        FileUtils.deleteQuietly(resultZip)
+        FileUtils.deleteQuietly(extractedDir)
+      }
+    }
+  }
+
   "searching for regex in files" should {
     "return proper entry if there exist simple entry that matches regex" in {
       val srcPath = getClass.getResource("regex_sample.txt").getPath
@@ -104,5 +141,27 @@ class FileHelperTest extends SpecificationWithJUnit {
 
       matchedSeq must beEmpty
     }
+  }
+
+  private def createTextFilesModifyingOperation(fileMap : scala.collection.mutable.Map[String, String]): String => Unit = {
+    val operation = (tmpPath: String) => {
+      val tmpDir = new File(tmpPath)
+      tmpDir.isDirectory must beEqualTo(true)
+      val files = tmpDir.listFiles
+      for (i <- 0 to files.length - 1) {
+        val source = Source.fromFile(files(i))
+        val out = new PrintWriter(files(i).getAbsolutePath, "UTF-8")
+        try {
+          val readText = source.mkString + " test " + i
+          fileMap(files(i).getName) = readText
+          out.print(readText)
+        }
+        finally {
+          source.close()
+          out.close()
+        }
+      }
+    }
+    operation
   }
 }
