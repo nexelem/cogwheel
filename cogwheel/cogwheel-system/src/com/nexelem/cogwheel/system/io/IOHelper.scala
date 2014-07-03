@@ -12,7 +12,8 @@ object IOHelper {
 
   /**
    * Closes passed object with use of close() method. On error does nothing for now - exactly like IOUtils.closeQuietly from apache commons-io
-   * @param closable any object having method close with no params and no return type. Btw this a nice use of structural typing (aka. duck typing for static typing)
+   * @param closable any object having method close with no params and no return type. Btw this a nice use of structural typing
+   *                 (aka. duck typing for static typing)
    */
   def closeQuietely(closable: { def close() }) {
     try {

@@ -1,12 +1,13 @@
 package com.nexelem.cogwheel.system.file
 
-import org.specs2.mutable.SpecificationWithJUnit
-import org.apache.commons.logging.LogFactory
-import scala.io.Source
-import org.apache.commons.io.FileUtils
-import java.io.{PrintWriter, File}
+import java.io.{File, PrintWriter}
+
 import com.nexelem.cogwheel.system.zip.ZipHelper
-import java.io.File
+import org.apache.commons.io.FileUtils
+import org.apache.commons.logging.LogFactory
+import org.specs2.mutable.SpecificationWithJUnit
+
+import scala.io.Source
 
 import scala.util.Properties
 

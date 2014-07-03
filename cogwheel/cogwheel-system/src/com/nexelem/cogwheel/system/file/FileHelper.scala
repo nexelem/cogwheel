@@ -1,16 +1,16 @@
 package com.nexelem.cogwheel.system.file
 
-import java.io.{FilenameFilter, FileWriter, BufferedWriter, File}
-import org.apache.commons.io.filefilter.WildcardFileFilter
-import org.apache.commons.io.FileUtils
+import java.io.{FilenameFilter, BufferedWriter, File, FileWriter}
 
-import scala.io.{BufferedSource, Source}
-import scala.util.Properties
 import scala.collection.mutable.MutableList
+import scala.io.Source
+import scala.util.Properties
 
-import com.nexelem.cogwheel.system.zip.ZipHelper
 import com.nexelem.cogwheel.system.io.IOHelper
+import com.nexelem.cogwheel.system.zip.ZipHelper
 
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.filefilter.WildcardFileFilter
 
 /**
  * Project: cogwheel
