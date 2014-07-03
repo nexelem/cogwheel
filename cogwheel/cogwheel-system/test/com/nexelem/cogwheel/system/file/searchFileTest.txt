@@ -1,0 +1,1 @@
+An empty file used for testing FileHelper.fileExists

@@ -1,13 +1,15 @@
 package com.nexelem.cogwheel.system.file
 
-import java.io.{FileWriter, BufferedWriter, File}
-import scala.io.Source
-import scala.util.Properties
-import com.nexelem.cogwheel.system.process.ProcessHelper._
-import com.nexelem.cogwheel.system.zip.ZipHelper
+import java.io.{FilenameFilter, FileWriter, BufferedWriter, File}
+import org.apache.commons.io.filefilter.WildcardFileFilter
 import org.apache.commons.io.FileUtils
-import com.nexelem.cogwheel.system.io.IOHelper
+
+import scala.io.{BufferedSource, Source}
+import scala.util.Properties
 import scala.collection.mutable.MutableList
+
+import com.nexelem.cogwheel.system.zip.ZipHelper
+import com.nexelem.cogwheel.system.io.IOHelper
 
 
 /**
@@ -38,6 +40,7 @@ object FileHelper {
   def replaceValuesInFile(filePath: String, markerReplacements: Seq[(String, String)], separator: String = Properties.lineSeparator) {
     var buffWriter: BufferedWriter = null
     var fileWriter: FileWriter = null
+    var srcFileSource: Source = null
 
     val newFilename = File.createTempFile("temp", filePath.substring(filePath.lastIndexOf(".")), new File(filePath).getParentFile()).getAbsolutePath()
 
@@ -45,7 +48,8 @@ object FileHelper {
       fileWriter = new FileWriter(newFilename)
       buffWriter = new BufferedWriter(fileWriter)
 
-      val lines = Source.fromFile(filePath).getLines.toTraversable
+      srcFileSource = Source.fromFile(filePath)
+      val lines = srcFileSource.getLines.toTraversable
       val linesExceptLast = lines.slice(0, lines.size - 1)
 
       linesExceptLast.foreach(line => {
@@ -55,6 +59,7 @@ object FileHelper {
 
     } finally {
       if (buffWriter != null) buffWriter.close()
+      if (srcFileSource != null) srcFileSource.close()
     }
 
     new File(filePath).delete()
@@ -110,6 +115,22 @@ object FileHelper {
     }
 
     matchedLines
+  }
+
+  /**
+   * Searches for a specified file, allowing to use a wildcard symbol (*) in the filename
+   * @param filePathAndNameWithWildcard path with a pathname
+   * @return true if there is a match; otherwise returns false
+   */
+  def fileExists(filePathAndNameWithWildcard: String): Boolean = {
+    val temp = new File(filePathAndNameWithWildcard)
+
+    val dir = temp.getParentFile
+    val fileName = temp.getName
+
+    val fileFilter = new WildcardFileFilter(fileName)
+    val files = dir.listFiles(fileFilter.asInstanceOf[FilenameFilter])
+    if (!files.isEmpty) true else false
   }
 
   private def writeLine(line: String, buffWriter: BufferedWriter, markerReplacements: (String, String)*) {
