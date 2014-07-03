@@ -9,6 +9,8 @@ import org.specs2.mutable.SpecificationWithJUnit
 
 import scala.io.Source
 
+import scala.util.Properties
+
 /**
  * Project: cogwheel
  * User: pdolega
@@ -19,6 +21,7 @@ import scala.io.Source
 class FileHelperTest extends SpecificationWithJUnit {
 
   private val log = LogFactory.getLog(getClass)
+  private val separator = Properties.lineSeparator
   sequential // sekwencyjne wykonanie testow
 
   "replacing value in files" should {
@@ -46,7 +49,8 @@ class FileHelperTest extends SpecificationWithJUnit {
         FileHelper.replaceValuesInFile(testFile.getAbsolutePath, "{name}" -> "world", "{myName}" -> "Vladimir", "{country}" -> "Russia")
 
         val readText = Source.fromFile(testFile).mkString
-        readText must beEqualTo("Hello world !\nMy name is Vladimir.\nFrom Russia with love.")
+
+        readText must beEqualTo(s"Hello world !${separator}My name is Vladimir.${separator}From Russia with love.")
       } finally {
         FileUtils.deleteQuietly(testFile)
       }
@@ -141,6 +145,32 @@ class FileHelperTest extends SpecificationWithJUnit {
       val matchedSeq = FileHelper.matchLinesInFile(srcPath, "^this regex is not found$")
 
       matchedSeq must beEmpty
+    }
+  }
+
+  "searching for a file by name with a wildcard" should {
+    val srcFile = new File(getClass.getResource("searchFileTest.txt").getPath)
+    val location = srcFile.getParent
+
+    "return true if the exact file name is provided" in {
+      val testVal = location + "//searchFileTest.txt"
+      val fileExists = FileHelper.fileExists(testVal)
+
+      fileExists must beEqualTo(true)
+    }
+
+    "return true if there is a match" in {
+      val testVal = location + "//searchFileTe*.txt"
+      val fileExists = FileHelper.fileExists(testVal)
+
+      fileExists must beEqualTo(true)
+    }
+
+    "return false if there is no match" in {
+      val testVal = location + "//searchFileTe*a.txt"
+      val fileExists = FileHelper.fileExists(testVal)
+
+      fileExists must beEqualTo(false)
     }
   }
 
