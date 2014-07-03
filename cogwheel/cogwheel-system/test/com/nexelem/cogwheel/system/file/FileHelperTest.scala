@@ -49,14 +49,8 @@ class FileHelperTest extends SpecificationWithJUnit {
         FileHelper.replaceValuesInFile(testFile.getAbsolutePath, "{name}" -> "world", "{myName}" -> "Vladimir", "{country}" -> "Russia")
 
         val readText = Source.fromFile(testFile).mkString
-        val desiredResult = new StringBuilder
-        desiredResult.append("Hello world !")
-        desiredResult.append(separator)
-        desiredResult.append("My name is Vladimir.")
-        desiredResult.append(separator)
-        desiredResult.append("From Russia with love.")
 
-        readText must beEqualTo(desiredResult.toString())
+        readText must beEqualTo(s"Hello world !${separator}My name is Vladimir.${separator}From Russia with love.")
       } finally {
         FileUtils.deleteQuietly(testFile)
       }

@@ -42,14 +42,14 @@ object FileHelper {
     var fileWriter: FileWriter = null
     var srcFileSource: Source = null
 
-    val newFilename = File.createTempFile("temp", filePath.substring(filePath.lastIndexOf(".")), new File(filePath).getParentFile()).getAbsolutePath()
+    val newFilename = File.createTempFile("temp", filePath.substring(filePath.lastIndexOf(".")), new File(filePath).getParentFile).getAbsolutePath
 
     try {
       fileWriter = new FileWriter(newFilename)
       buffWriter = new BufferedWriter(fileWriter)
 
       srcFileSource = Source.fromFile(filePath)
-      val lines = srcFileSource.getLines.toTraversable
+      val lines = srcFileSource.getLines().toTraversable
       val linesExceptLast = lines.slice(0, lines.size - 1)
 
       linesExceptLast.foreach(line => {
@@ -73,8 +73,8 @@ object FileHelper {
    * @param operation closure representing operation executed on unpacked zip contents.
    */
   def repackAndProcess(filePath: String, targetPath: String)(operation: String => Unit) {
-    val tempDir = File.createTempFile("temp", null).getAbsolutePath()
-    val fileName = new File(filePath).getName()
+    val tempDir = File.createTempFile("temp", null).getAbsolutePath
+    val fileName = new File(filePath).getName
 
     FileUtils.forceDelete(new File(tempDir))
     FileUtils.forceMkdir(new File(tempDir))
@@ -130,7 +130,7 @@ object FileHelper {
 
     val fileFilter = new WildcardFileFilter(fileName)
     val files = dir.listFiles(fileFilter.asInstanceOf[FilenameFilter])
-    if (!files.isEmpty) true else false
+    if (files.nonEmpty) true else false
   }
 
   private def writeLine(line: String, buffWriter: BufferedWriter, markerReplacements: (String, String)*) {
