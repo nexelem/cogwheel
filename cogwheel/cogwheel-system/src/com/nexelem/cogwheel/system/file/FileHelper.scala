@@ -1,13 +1,14 @@
 package com.nexelem.cogwheel.system.file
 
-import java.io.{FileWriter, BufferedWriter, File}
-import scala.io.Source
-import scala.util.Properties
-import com.nexelem.cogwheel.system.process.ProcessHelper._
+import java.io.{BufferedWriter, File, FileWriter}
+
+import com.nexelem.cogwheel.system.io.IOHelper
 import com.nexelem.cogwheel.system.zip.ZipHelper
 import org.apache.commons.io.FileUtils
-import com.nexelem.cogwheel.system.io.IOHelper
+
 import scala.collection.mutable.MutableList
+import scala.io.Source
+import scala.util.Properties
 
 
 /**

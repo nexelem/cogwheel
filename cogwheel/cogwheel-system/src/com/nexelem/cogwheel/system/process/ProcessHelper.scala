@@ -15,13 +15,17 @@ import java.util.Properties
  */
 object ProcessHelper {
 
+  private val BASH = "bash"
+  private val CMD_FROM_STRING = "-c"
+
   /**
    * Executes simple bash command.
    */
   def bash(cmd: String) {
-    val returnCode = Seq("bash", "-c", cmd) !;
-    if (returnCode != 0)
+    val returnCode = Seq(BASH, CMD_FROM_STRING, cmd) !;
+    if (returnCode != 0) {
       throw new ProcessException(returnCode)
+    }
   }
 
   /**
@@ -31,11 +35,12 @@ object ProcessHelper {
     val outputList = new MutableList[String]
     val outputLogger = ProcessLogger(outputLine => outputList += outputLine)
 
-    val returnCode = Seq("bash", "-c", cmd) ! outputLogger;
-    if (returnCode != 0)
+    val returnCode = Seq(BASH, CMD_FROM_STRING, cmd) ! outputLogger;
+    if (returnCode != 0) {
       throw new ProcessException(returnCode)
+    }
 
-    return outputList.mkString("\n")
+    outputList.mkString("\n")
   }
 
   /**
@@ -44,7 +49,7 @@ object ProcessHelper {
   def bashAsync(cmd: String, extraEnv: (String, String)*) {
     val workingDir = None
 
-    val process = Process(Seq("bash", "-c", cmd), workingDir, extraEnv: _*)
+    val process = Process(Seq(BASH, CMD_FROM_STRING, cmd), workingDir, extraEnv: _*)
     val io = new ProcessIO(stdin => (),
       stdout => scala.io.Source.fromInputStream(stdout).getLines.foreach(println),
       stderr => ())
@@ -54,9 +59,9 @@ object ProcessHelper {
   /**
    * Gets value from properties or retrieves default if value does not exist
    */
-  def getOrDefault(props: Properties, key: String, defaultVal: String) = {
+  def getOrDefault(props: Properties, key: String, defaultVal: String) : String = {
     val propVal = props.getProperty(key)
-    if (propVal != null) propVal else defaultVal
+    if (propVal != null) { propVal } else { defaultVal }
   }
 }
 
