@@ -23,6 +23,14 @@ import org.apache.commons.io.filefilter.WildcardFileFilter
 object FileHelper {
 
   /**
+   * Deletes file or directory without throwing exceptions (if any exception is being thrown it is swalled).
+   * Meaning you can't be really sure if this method succeeded.
+   */
+  def deleteQuietly(filePath: String) {
+    FileUtils.deleteQuietly(new File(filePath))
+  }
+
+  /**
    * Replaces values in given file.
    * @param filePath
    * @param markerReplacements replacement values
