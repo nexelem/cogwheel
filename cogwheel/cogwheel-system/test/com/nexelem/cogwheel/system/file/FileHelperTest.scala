@@ -24,6 +24,16 @@ class FileHelperTest extends SpecificationWithJUnit {
   private val separator = Properties.lineSeparator
   sequential // sekwencyjne wykonanie testow
 
+  "deleting file" should {
+    "be obviously successful" in {
+      val tempFile = File.createTempFile("pref", "test")
+      tempFile.exists() must beTrue
+
+      FileHelper.deleteQuietly(tempFile.getAbsolutePath)
+      tempFile.exists() must beFalse
+    }
+  }
+
   "replacing value in files" should {
     "replace existing values correctly" in {
       val srcFile = new File(getClass.getResource("replaceFileSimple.txt").getPath)
