@@ -91,6 +91,7 @@ class FileHelperTest extends SpecificationWithJUnit {
       val extractedDir = new File(resultZip.getParent + File.separator + "result")
       try {
         FileHelper.repackAndProcess(testZip.getAbsolutePath, resultZip.getAbsolutePath)(operation)
+
         resultZip.isFile must beEqualTo(true)
         FileUtils.forceMkdir(extractedDir)
         extractedDir.isDirectory must beEqualTo(true)
@@ -110,6 +111,23 @@ class FileHelperTest extends SpecificationWithJUnit {
       } finally {
         FileUtils.deleteQuietly(resultZip)
         FileUtils.deleteQuietly(extractedDir)
+      }
+    }
+
+    "repack existing jar archive correctly" in {
+      val testZip = new File(getClass.getResource("lab-webapp.lab-webapp-1.0-SNAPSHOT.jar").getPath)
+      val resultZip = new File(testZip.getParent, "result.zip")
+
+      var successVal = false
+
+      try {
+        FileHelper.repackAndProcess(testZip.getAbsolutePath, resultZip.getAbsolutePath) { dir =>
+          successVal = true
+        }
+
+        successVal must beEqualTo(true)
+      } finally {
+        FileUtils.deleteQuietly(resultZip)
       }
     }
   }

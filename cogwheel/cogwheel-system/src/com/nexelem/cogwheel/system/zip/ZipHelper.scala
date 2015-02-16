@@ -87,12 +87,18 @@ object ZipHelper {
 
   private def extractEntry(zipFile: ZipFile, entry: ZipArchiveEntry, destPath: String) {
     val f = new File(destPath, entry.getName.replace(ARCHIVE_FILE_SEPARATOR, File.separator))
+
     if (entry.isDirectory) {
       FileUtils.forceMkdir(f)
     } else {
       if (f.exists && !entry.isDirectory) {
         FileUtils.forceDelete(f)
       }
+
+      if(!f.getParentFile.exists()) {
+        FileUtils.forceMkdir(f.getParentFile)
+      }
+
       var fos: FileOutputStream = null
       val content = zipFile.getInputStream(entry)
       try {
