@@ -1,11 +1,12 @@
 package com.nexelem.cogwheel.system.net
 
-import java.io.{FileOutputStream, FileInputStream}
+import java.io.{File, FileInputStream, FileOutputStream}
 import java.net.URL
 import java.security.KeyStore
 import java.security.cert.X509Certificate
 import javax.net.ssl._
 
+import org.apache.commons.io.FileUtils
 import org.apache.commons.logging.LogFactory
 import resource._
 
@@ -49,7 +50,7 @@ object SslHelper {
         log.debug(s"Expected exception - certificate is not yet in truststore...")
     }
 
-    storeCertificates(store, trustStorePath, certName, pass, savingTrustManager.chain)
+    storeCertificates(store, trustStorePath, pass, certName, savingTrustManager.chain)
   }
 
   def storeCertificates(store: KeyStore, trustStorePath: String, pass: String, certName: String, certs: Array[X509Certificate]) {
