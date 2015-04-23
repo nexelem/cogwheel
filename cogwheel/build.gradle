@@ -42,8 +42,8 @@ subprojects {
     
     processTestResources.exclude "**/*.java, **/*.scala"
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
 
     jar.from "src"
     jar.excludes = ["**/*.java", "**/*.scala"]           
